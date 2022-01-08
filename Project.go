@@ -89,6 +89,15 @@ func AddUserData(w http.ResponseWriter, r *http.Request){
 	}
 }
 
+func DeleteAllUsersData(w http.ResponseWriter, r *http.Request){
+
+	_, err = database.Exec("delete from userinformation")
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+
 func main() {
 	database, err = sql.Open("mysql","root:Reddy@123@tcp(127.0.0.1:3306)/admybrand")
 	if err!= nil{
@@ -98,5 +107,6 @@ func main() {
 	router.HandleFunc("/get",GetUserInformation).Methods("GET")
 	router.HandleFunc("/get/{id}",GetUserInformationById).Methods("GET")
 	router.HandleFunc("/create",AddUserData).Methods("POST")
+	router.HandleFunc("/delete",DeleteAllUsersData).Methods("DELETE")
 	http.ListenAndServe(":8000",router)
 }
