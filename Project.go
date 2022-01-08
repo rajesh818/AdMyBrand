@@ -3,6 +3,8 @@ package main
 import (
 	"database/sql" // provides a generic interface around SQL databases
 
+	"io/ioutil"
+
 	_ "github.com/go-sql-driver/mysql" //MySQL-Driver
 
 	"encoding/json" //Package json implements encoding and decoding of JSON
@@ -69,7 +71,22 @@ func GetUserInformationById(w http.ResponseWriter, r *http.Request){
 	}
 	w.Header().Set("content-type","application/json")
 	json.NewEncoder(w).Encode(response)
+}
 
+func AddUserData(w http.ResponseWriter, r *http.Request){
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var user_data UserData
+	err = json.Unmarshal(body,&user_data)
+	if err!=nil{
+		log.Fatal(err)
+	}
+	_, err = database.Exec("insert into userinformation(id,name,dob,address,description) values(?,?,?,?,?);",user_data.Id,user_data.Name,user_data.Dob,user_data.Address,user_data.Description)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func main() {
@@ -80,5 +97,6 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/get",GetUserInformation).Methods("GET")
 	router.HandleFunc("/get/{id}",GetUserInformationById).Methods("GET")
+	router.HandleFunc("/create",AddUserData).Methods("POST")
 	http.ListenAndServe(":8000",router)
 }
