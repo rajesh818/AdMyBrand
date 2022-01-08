@@ -97,7 +97,18 @@ func DeleteAllUsersData(w http.ResponseWriter, r *http.Request){
 	}
 }
 
+func DeleteUserDataById(w http.ResponseWriter, r *http.Request){
+	params := mux.Vars(r)
+	ID,err := strconv.Atoi(params["id"])
+	if err!=nil{
+		log.Fatal(err)
+	}
+	_, err = database.Exec("delete from userinformation where id = ?",ID)
+	if err!= nil{
+		log.Fatal(err)
+	}
 
+}
 func main() {
 	database, err = sql.Open("mysql","root:Reddy@123@tcp(127.0.0.1:3306)/admybrand")
 	if err!= nil{
@@ -108,5 +119,6 @@ func main() {
 	router.HandleFunc("/get/{id}",GetUserInformationById).Methods("GET")
 	router.HandleFunc("/create",AddUserData).Methods("POST")
 	router.HandleFunc("/delete",DeleteAllUsersData).Methods("DELETE")
+	router.HandleFunc("/delete/{id}",DeleteUserDataById).Methods("DELETE")
 	http.ListenAndServe(":8000",router)
 }
