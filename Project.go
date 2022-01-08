@@ -11,6 +11,8 @@ import (
 
 	"log"
 
+	"strconv"
+
 	"net/http"
 )
 var database *sql.DB
@@ -45,6 +47,31 @@ func GetUserInformation(w http.ResponseWriter, r *http.Request){
 	json.NewEncoder(w).Encode(response)
 }
 
+func GetUserInformationById(w http.ResponseWriter, r *http.Request){
+	params := mux.Vars(r)
+	ID,err := strconv.Atoi(params["id"])
+	if err!=nil{
+		log.Fatal(err)
+	}
+	Information, err := database.Query("select * from userinformation where id = ?;",ID)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer Information.Close()
+	var response []UserData
+	for Information.Next(){
+		var data UserData
+		err := Information.Scan(&data.Id,&data.Name,&data.Dob,&data.Address,&data.Description,&data.CreatedAt)
+		if err!= nil{
+			log.Fatal(err)
+		}
+		response = append(response, data)
+	}
+	w.Header().Set("content-type","application/json")
+	json.NewEncoder(w).Encode(response)
+
+}
+
 func main() {
 	database, err = sql.Open("mysql","root:Reddy@123@tcp(127.0.0.1:3306)/admybrand")
 	if err!= nil{
@@ -52,5 +79,6 @@ func main() {
 	}
 	router := mux.NewRouter()
 	router.HandleFunc("/get",GetUserInformation).Methods("GET")
+	router.HandleFunc("/get/{id}",GetUserInformationById).Methods("GET")
 	http.ListenAndServe(":8000",router)
 }
