@@ -29,6 +29,10 @@ type UserData struct{
 	CreatedAt string `json:"createdat"`
 }
 
+type Response_Message struct {
+	Message string `json:"message"`
+}
+
 func GetUserInformation(w http.ResponseWriter, r *http.Request){
 
 	Information, err := database.Query("select * from userinformation;")
@@ -74,60 +78,97 @@ func GetUserInformationById(w http.ResponseWriter, r *http.Request){
 }
 
 func AddUserData(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Content-Type", "application/json")
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Fatal(err)
 	}
 	var user_data UserData
+	var response Response_Message
 	err = json.Unmarshal(body,&user_data)
 	if err!=nil{
+		response.Message = "Failed to add user data"
+		json.NewEncoder(w).Encode(response)
 		log.Fatal(err)
 	}
 	_, err = database.Exec("insert into userinformation(id,name,dob,address,description) values(?,?,?,?,?);",user_data.Id,user_data.Name,user_data.Dob,user_data.Address,user_data.Description)
 	if err != nil {
+		response.Message = "Failed to add user data"
+		json.NewEncoder(w).Encode(response)
 		log.Fatal(err)
+	} else{
+		response.Message = "Successfully added user information"
 	}
+	json.NewEncoder(w).Encode(response)
 }
 
 func DeleteAllUsersData(w http.ResponseWriter, r *http.Request){
-
+	w.Header().Set("content-type","application/json")
+	var response Response_Message
 	_, err = database.Exec("delete from userinformation")
 	if err != nil {
+		response.Message = "Failed to delete user data"
+		json.NewEncoder(w).Encode(response)
 		log.Fatal(err)
+	} else{
+		response.Message = "Successfully deleted user data"
 	}
+	json.NewEncoder(w).Encode(response)
 }
 
 func DeleteUserDataById(w http.ResponseWriter, r *http.Request){
 	params := mux.Vars(r)
+	w.Header().Set("content-type","application/json")
+	var response Response_Message
 	ID,err := strconv.Atoi(params["id"])
 	if err!=nil{
+		response.Message = "Failed to delete user data"
+		json.NewEncoder(w).Encode(response)
 		log.Fatal(err)
 	}
 	_, err = database.Exec("delete from userinformation where id = ?",ID)
 	if err!= nil{
+		response.Message = "Failed to delete user data"
+		json.NewEncoder(w).Encode(response)
 		log.Fatal(err)
+	} else{
+		response.Message = "Successfully deleted user data"
 	}
+	json.NewEncoder(w).Encode(response)
 }
 
 func UpdateUserInformation(w http.ResponseWriter, r *http.Request){
 	params := mux.Vars(r)
+	w.Header().Set("content-type","application/json")
+	var response Response_Message
 	ID,err := strconv.Atoi(params["id"])
 	if err!=nil{
+		response.Message = "Failed to update user data"
+		json.NewEncoder(w).Encode(response)
 		log.Fatal(err)
 	}
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
+		response.Message = "Failed to update user data"
+		json.NewEncoder(w).Encode(response)
 		log.Fatal(err)
 	}
 	var user_data UserData
 	err = json.Unmarshal(body,&user_data)
 	if err!=nil{
+		response.Message = "Failed to update user data"
+		json.NewEncoder(w).Encode(response)
 		log.Fatal(err)
 	}
 	_, err = database.Exec("update userinformation set id = ?,name = ?,dob = ?,address = ?,description = ? where id = ?",user_data.Id,user_data.Name,user_data.Dob,user_data.Address,user_data.Description,ID)
 	if err!= nil{
+		response.Message = "Failed to update user data"
+		json.NewEncoder(w).Encode(response)
 		log.Fatal(err)
+	} else{
+		response.Message = "Successfully updated user data"
 	}
+	json.NewEncoder(w).Encode(response)
 }
 
 func main() {
