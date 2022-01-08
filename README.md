@@ -5,9 +5,10 @@ Firstly you have install go and mysql database software on your PC.
 Then create a database with name as **admybrand**. And create a table using table.sql file that is provided.
 
 ## How to connect to local database(MySql)
-> sql.Open("mysql","user:password@tcp(127.0.0.1:port)/databasename")  
+```
+sql.Open("mysql","user:password@tcp(127.0.0.1:port)/databasename")  
 usually port = 3306
-
+```
 
 **There are 6 endpoints** 
 > **GET**  /get ***to get all users information***
@@ -28,14 +29,15 @@ In postman set the method as post and url as "http://localhost:8000/create" and 
 
 *sample user information*
 
+```
 {
-
     "id": 1,
     "name": "Rajesh",
     "dob": "2000-01-01",
     "address": "darmavaram",
     "description": "Final year Student"
 }
+```
 
 After adding the users data into the tables now we can use other endpoints easily
 
