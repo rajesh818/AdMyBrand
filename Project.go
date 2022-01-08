@@ -107,8 +107,29 @@ func DeleteUserDataById(w http.ResponseWriter, r *http.Request){
 	if err!= nil{
 		log.Fatal(err)
 	}
-
 }
+
+func UpdateUserInformation(w http.ResponseWriter, r *http.Request){
+	params := mux.Vars(r)
+	ID,err := strconv.Atoi(params["id"])
+	if err!=nil{
+		log.Fatal(err)
+	}
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var user_data UserData
+	err = json.Unmarshal(body,&user_data)
+	if err!=nil{
+		log.Fatal(err)
+	}
+	_, err = database.Exec("update userinformation set id = ?,name = ?,dob = ?,address = ?,description = ? where id = ?",user_data.Id,user_data.Name,user_data.Dob,user_data.Address,user_data.Description,ID)
+	if err!= nil{
+		log.Fatal(err)
+	}
+}
+
 func main() {
 	database, err = sql.Open("mysql","root:Reddy@123@tcp(127.0.0.1:3306)/admybrand")
 	if err!= nil{
@@ -120,5 +141,6 @@ func main() {
 	router.HandleFunc("/create",AddUserData).Methods("POST")
 	router.HandleFunc("/delete",DeleteAllUsersData).Methods("DELETE")
 	router.HandleFunc("/delete/{id}",DeleteUserDataById).Methods("DELETE")
+	router.HandleFunc("/update/{id}",UpdateUserInformation).Methods("PUT")
 	http.ListenAndServe(":8000",router)
 }
